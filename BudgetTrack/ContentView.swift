@@ -31,7 +31,7 @@ struct ContentView: View {
                     ForEach(entries) { item in
                         ExpenseRowView(item: item, selectedMonth: selectedMonth)
                     }
-                    //.onDelete(perform: deleteExpense)
+                    .onDelete(perform: deleteExpense)
                 }
                 
                 Section {
@@ -53,9 +53,13 @@ struct ContentView: View {
         }
     }
     
-//    func deleteExpense(at offsets: IndexSet) {
-//        entries.items.remove(atOffsets: offsets)
-//    }
+    func deleteExpense(at offsets: IndexSet) {
+        for offset in offsets {
+            let entry = entries[offset]
+            
+            modelContext.delete(entry)
+        }
+    }
     
 //    func total(entries: Entries, selectedMonth: String) -> Double {
 //        var incomes = [Double]()
