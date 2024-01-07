@@ -6,15 +6,17 @@
 //
 
 
+import SwiftData
 import SwiftUI
 
 
 struct ContentView: View {
-    @State private var entries = Entries()
-
+    @Environment(\.modelContext) var modelContext
+    @Query private var entries: [Entry]
+    
     let months: [String] = Calendar.current.monthSymbols
     @State private var selectedMonth = "January"
-
+    
     var body: some View {
         NavigationStack {
             List {
@@ -24,51 +26,51 @@ struct ContentView: View {
                     }
                 }
                 .labelsHidden()
-
+                
                 Section {
-                    ForEach(entries.items) { item in
+                    ForEach(entries) { item in
                         ExpenseRowView(item: item, selectedMonth: selectedMonth)
                     }
-                    .onDelete(perform: deleteExpense)
+                    //.onDelete(perform: deleteExpense)
                 }
-
+                
                 Section {
                     HStack {
                         Text("Total: ")
-                        Text(total(entries: entries, selectedMonth: selectedMonth), format: .currency(code: Locale.current.currency?.identifier ?? "GBP"))
+                        //Text(total(entries: entries, selectedMonth: selectedMonth), format: .currency(code: Locale.current.currency?.identifier ?? "GBP"))
                     }
                 }
             }
             .toolbar {
-                NavigationLink(value: entries) {
+                NavigationLink {
+                    AddExpenseView()
+                } label: {
                     Text("Add expense")
                 }
-                .navigationDestination(for: Entries.self) { entries in
-                    AddExpenseView(entries: entries)
-                }
+
             }
             .navigationTitle("\(selectedMonth)")
         }
     }
-
-    func deleteExpense(at offsets: IndexSet) {
-        entries.items.remove(atOffsets: offsets)
-    }
-
-    func total(entries: Entries, selectedMonth: String) -> Double {
-        var incomes = [Double]()
-        var expenses = [Double]()
-
-        for entry in entries.items {
-            if entry.type == .income && entry.date.getMonthString() == selectedMonth {
-                incomes.append(entry.amount)
-            } else if entry.type == .expense && entry.date.getMonthString() == selectedMonth {
-                expenses.append(entry.amount)
-            }
-        }
-
-        return (incomes.reduce(0, +)) - (expenses.reduce(0, +))
-    }
+    
+//    func deleteExpense(at offsets: IndexSet) {
+//        entries.items.remove(atOffsets: offsets)
+//    }
+    
+//    func total(entries: Entries, selectedMonth: String) -> Double {
+//        var incomes = [Double]()
+//        var expenses = [Double]()
+//
+//        for entry in entries.items {
+//            if entry.type == .income && entry.date.getMonthString() == selectedMonth {
+//                incomes.append(entry.amount)
+//            } else if entry.type == .expense && entry.date.getMonthString() == selectedMonth {
+//                expenses.append(entry.amount)
+//            }
+//        }
+//
+//        return (incomes.reduce(0, +)) - (expenses.reduce(0, +))
+//    }
 }
 
 #Preview {

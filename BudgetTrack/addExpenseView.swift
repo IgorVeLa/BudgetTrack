@@ -7,20 +7,20 @@
 
 
 import Foundation
+import SwiftData
 import SwiftUI
 
 
 struct AddExpenseView: View {
+    @Environment(\.modelContext) var modelContext
     @Environment(\.dismiss) var dismiss
-    
-    var entries: Entries
     
     @State private var name = ""
     @State private var amount = 0.0
     @State private var selectedType: EntryType = .expense
     @State private var date = Date.now
     
-
+    
     var body: some View {
         List {
             Picker("Type", selection: $selectedType) {
@@ -29,15 +29,15 @@ struct AddExpenseView: View {
                 }
             }
             .pickerStyle(.segmented)
-
+            
             DatePicker("Pick the date", selection: $date, displayedComponents: ([.date]))
                 .labelsHidden()
-
+            
             TextField("Name", text: $name)
-
+            
             TextField("Amount", value: $amount, format: .currency(code: "GBP"))
                 .keyboardType(.decimalPad)
-
+            
         }
         .toolbar {
             ToolbarItem {
@@ -46,8 +46,9 @@ struct AddExpenseView: View {
                                         amount: amount,
                                         type: selectedType,
                                         date: date)
-                    entries.items.append(item)
-
+                    
+                    modelContext.insert(item)
+                    
                     dismiss()
                 }
             }
@@ -59,12 +60,12 @@ struct AddExpenseView: View {
             }
         }
     }
-
+    
     func save() {
         dismiss()
     }
 }
 
 #Preview {
-    AddExpenseView(entries: Entries())
+    AddExpenseView()
 }
