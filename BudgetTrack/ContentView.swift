@@ -16,20 +16,33 @@ struct ContentView: View {
     
     let months: [String] = Calendar.current.monthSymbols
     @State private var selectedMonth = "January"
+    @State private var selectedYear = Date.now.getYear()
+    let currentYear = Date.now.getYear()
+
     
     var body: some View {
         NavigationStack {
             List {
-                Picker("View month", selection: $selectedMonth) {
-                    ForEach(months, id: \.self) {
-                        Text($0)
+                HStack {
+                    Spacer()
+                    Picker("View month", selection: $selectedMonth) {
+                        ForEach(months, id: \.self) {
+                            Text($0)
+                        }
                     }
+
+                    Picker("View year", selection: $selectedYear) {
+                        ForEach(2000...currentYear, id: \.self) {
+                            Text(String($0))
+                        }
+                    }
+                    Spacer()
                 }
                 .labelsHidden()
                 
                 Section {
-                    ForEach(entries) { item in
-                        ExpenseRowView(item: item, selectedMonth: selectedMonth)
+                    ForEach(entries) { entry in
+                        ExpenseRowView(entry: entry, selectedMonth: selectedMonth, selectedYear: selectedYear)
                     }
                     .onDelete(perform: deleteExpense)
                 }
@@ -49,7 +62,7 @@ struct ContentView: View {
                 }
 
             }
-            .navigationTitle("\(selectedMonth)")
+            .navigationTitle(Text(verbatim: "\(selectedMonth) \(selectedYear)"))
         }
     }
     
@@ -66,12 +79,13 @@ struct ContentView: View {
         var expenses = [Double]()
         
         for entry in entries {
-            if entry.type == .income && entry.date.getMonthString() == selectedMonth {
+            if entry.type == .income && entry.date.getMonthString() == selectedMonth && entry.date.getYear() == selectedYear {
                 incomes.append(entry.amount)
-            } else if entry.type == .expense && entry.date.getMonthString() == selectedMonth {
+            } else if entry.type == .expense && entry.date.getMonthString() == selectedMonth && entry.date.getYear() == selectedYear  {
                 expenses.append(entry.amount)
             }
         }
+
 
         return (incomes.reduce(0, +)) - (expenses.reduce(0, +))
     }
