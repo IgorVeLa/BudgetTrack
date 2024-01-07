@@ -7,6 +7,7 @@
 
 
 import Foundation
+import SwiftData
 import SwiftUI
 
 
@@ -29,7 +30,6 @@ struct ExpenseRowView: View {
                     VStack {
                         Text(entry.amount, format: .currency(code: Locale.current.currency?.identifier ?? "GBP"))
                         Text(entry.date, format: .dateTime.day().month())
-                        Text(String(entry.date.getYear()))
                     }
                 }
             }
@@ -37,7 +37,14 @@ struct ExpenseRowView: View {
     }
 }
 
-//#Preview {
-//    ExpenseRowView(item: Entry(name: "Test", amount: 12.50, type: .expense, date: Date.now),
-//                   selectedMonth: "December")
-//}
+#Preview {
+    do {
+        let config = ModelConfiguration(isStoredInMemoryOnly: true)
+        let modelContext = try ModelContainer(for: Entry.self, configurations: config)
+        let testData = Entry(name: "String", amount: 15.00, type: .expense, date: Date.now)
+        
+        return ExpenseRowView(entry: testData, selectedMonth: Date.now.getMonthString(), selectedYear: Date.now.getYear())
+    } catch {
+        return Text("Failed to create preview: \(error.localizedDescription)")
+    }
+}
