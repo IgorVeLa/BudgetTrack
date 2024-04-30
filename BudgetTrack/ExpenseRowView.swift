@@ -44,6 +44,7 @@ struct ExpenseRowView: View {
         let testData = Entry(name: "String", amount: 15.00, type: .expense, date: Date.now)
         
         return ExpenseRowView(entry: testData, selectedMonth: Date.now.getMonthString(), selectedYear: Date.now.getYear())
+            .modelContainer(modelContext)
     } catch {
         return Text("Failed to create preview: \(error.localizedDescription)")
     }

@@ -15,10 +15,9 @@ struct ContentView: View {
     @Query private var entries: [Entry]
     
     let months: [String] = Calendar.current.monthSymbols
-    @State private var selectedMonth = "January"
+    @State private var selectedMonth = Date.now.getMonthString()
     @State private var selectedYear = Date.now.getYear()
     let currentYear = Date.now.getYear()
-
     
     var body: some View {
         NavigationStack {
@@ -30,7 +29,7 @@ struct ContentView: View {
                             Text($0)
                         }
                     }
-
+                    
                     Picker("View year", selection: $selectedYear) {
                         ForEach(2000...currentYear, id: \.self) {
                             Text(String($0))
@@ -58,7 +57,7 @@ struct ContentView: View {
                 NavigationLink {
                     AddExpenseView()
                 } label: {
-                    Text("Add expense")
+                    Text("\(Image(systemName: "plus"))")
                 }
 
             }
