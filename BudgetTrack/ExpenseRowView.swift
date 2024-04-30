@@ -7,27 +7,29 @@
 
 
 import Foundation
+import SwiftData
 import SwiftUI
 
 
 struct ExpenseRowView: View {
-    var item: Entry
+    var entry: Entry
     var selectedMonth: String
+    var selectedYear: Int
 
     var body: some View {
         Group {
-            if item.date.getMonthString() == selectedMonth {
+            if entry.date.getMonthString() == selectedMonth && entry.date.getYear() == selectedYear  {
                 HStack {
                     VStack {
-                        Text(item.name)
-                        Text(item.type.rawValue)
+                        Text(entry.name)
+                        Text(entry.type.rawValue)
                     }
 
                     Spacer()
 
                     VStack {
-                        Text(item.amount, format: .currency(code: Locale.current.currency?.identifier ?? "GBP"))
-                        Text(item.date, format: .dateTime.day().month())
+                        Text(entry.amount, format: .currency(code: Locale.current.currency?.identifier ?? "GBP"))
+                        Text(entry.date, format: .dateTime.day().month())
                     }
                 }
             }
@@ -36,6 +38,14 @@ struct ExpenseRowView: View {
 }
 
 #Preview {
-    ExpenseRowView(item: Entry(name: "Test", amount: 12.50, type: .expense, date: Date.now),
-                   selectedMonth: "December")
+    do {
+        let config = ModelConfiguration(isStoredInMemoryOnly: true)
+        let modelContext = try ModelContainer(for: Entry.self, configurations: config)
+        let testData = Entry(name: "String", amount: 15.00, type: .expense, date: Date.now)
+        
+        return ExpenseRowView(entry: testData, selectedMonth: Date.now.getMonthString(), selectedYear: Date.now.getYear())
+            .modelContainer(modelContext)
+    } catch {
+        return Text("Failed to create preview: \(error.localizedDescription)")
+    }
 }

@@ -18,4 +18,16 @@ extension Date {
 
         return monthString
     }
+    
+    func getYearString() -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "YYYY"
+        let monthString = dateFormatter.string(from: self)
+
+        return monthString
+    }
+    
+    func getYear() -> Int {
+        return Calendar.current.component(.year, from: self)
+    }
 }

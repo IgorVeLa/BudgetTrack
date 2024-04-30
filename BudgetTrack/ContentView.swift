@@ -6,32 +6,46 @@
 //
 
 
+import SwiftData
 import SwiftUI
 
 
 struct ContentView: View {
-    @State private var entries = Entries()
-
+    @Environment(\.modelContext) var modelContext
+    @Query private var entries: [Entry]
+    
     let months: [String] = Calendar.current.monthSymbols
-    @State private var selectedMonth = "January"
-
+    @State private var selectedMonth = Date.now.getMonthString()
+    @State private var selectedYear = Date.now.getYear()
+    let currentYear = Date.now.getYear()
+    
     var body: some View {
         NavigationStack {
             List {
-                Picker("View month", selection: $selectedMonth) {
-                    ForEach(months, id: \.self) {
-                        Text($0)
+                HStack {
+                    Spacer()
+                    Picker("View month", selection: $selectedMonth) {
+                        ForEach(months, id: \.self) {
+                            Text($0)
+                        }
                     }
+                    
+                    Picker("View year", selection: $selectedYear) {
+                        ForEach(2000...currentYear, id: \.self) {
+                            Text(String($0))
+                        }
+                    }
+                    Spacer()
                 }
                 .labelsHidden()
-
+                
                 Section {
-                    ForEach(entries.items) { item in
-                        ExpenseRowView(item: item, selectedMonth: selectedMonth)
+                    ForEach(entries) { entry in
+                        ExpenseRowView(entry: entry, selectedMonth: selectedMonth, selectedYear: selectedYear)
                     }
                     .onDelete(perform: deleteExpense)
                 }
-
+                
                 Section {
                     HStack {
                         Text("Total: ")
@@ -40,32 +54,37 @@ struct ContentView: View {
                 }
             }
             .toolbar {
-                NavigationLink(value: entries) {
-                    Text("Add expense")
+                NavigationLink {
+                    AddExpenseView()
+                } label: {
+                    Text("\(Image(systemName: "plus"))")
                 }
-                .navigationDestination(for: Entries.self) { entries in
-                    AddExpenseView(entries: entries)
-                }
+
             }
-            .navigationTitle("\(selectedMonth)")
+            .navigationTitle(Text(verbatim: "\(selectedMonth) \(selectedYear)"))
         }
     }
-
+    
     func deleteExpense(at offsets: IndexSet) {
-        entries.items.remove(atOffsets: offsets)
+        for offset in offsets {
+            let entry = entries[offset]
+            
+            modelContext.delete(entry)
+        }
     }
-
-    func total(entries: Entries, selectedMonth: String) -> Double {
+    
+    func total(entries: [Entry], selectedMonth: String) -> Double {
         var incomes = [Double]()
         var expenses = [Double]()
-
-        for entry in entries.items {
-            if entry.type == .income && entry.date.getMonthString() == selectedMonth {
+        
+        for entry in entries {
+            if entry.type == .income && entry.date.getMonthString() == selectedMonth && entry.date.getYear() == selectedYear {
                 incomes.append(entry.amount)
-            } else if entry.type == .expense && entry.date.getMonthString() == selectedMonth {
+            } else if entry.type == .expense && entry.date.getMonthString() == selectedMonth && entry.date.getYear() == selectedYear  {
                 expenses.append(entry.amount)
             }
         }
+
 
         return (incomes.reduce(0, +)) - (expenses.reduce(0, +))
     }
